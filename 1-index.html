@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>تقرير الحصة بالضغطات | أكاديمية فِطرة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --petrol:#1e5a5a; --petrol-dark:#153f3f; --petrol-light:#2a7a7a;
+  --beige:#f0e6d2; --beige-light:#faf5ea; --gold:#c9a227; --gold-light:#e3c566;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Cairo',sans-serif; background:var(--beige-light); color:#3d3a34; min-height:100vh; }
+.wrap { max-width:560px; margin:0 auto; padding:16px 14px 40px; }
+
+header { display:flex; align-items:center; gap:12px; background:var(--petrol); border-radius:16px; padding:14px 16px; color:#fff; margin-bottom:14px; box-shadow:0 2px 8px rgba(30,90,90,.18); }
+header img { width:46px; height:46px; border-radius:12px; object-fit:cover; background:#fff; padding:2px; }
+header .t1 { font-weight:800; font-size:17px; }
+header .t2 { font-size:12px; color:var(--beige); opacity:.9; margin-top:2px; }
+
+.card { background:#fff; border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(30,90,90,.08); border:1px solid rgba(30,90,90,.07); }
+.card h2 { font-size:15px; font-weight:800; color:var(--petrol-dark); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+.card h2 .n { width:22px; height:22px; border-radius:50%; background:var(--gold); color:var(--petrol-dark); font-size:12px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+
+input[type=text] { width:100%; border:1.5px solid #ddd5c2; border-radius:10px; padding:10px 12px; font-family:inherit; font-size:14px; outline:none; background:#fff; }
+input[type=text]:focus { border-color:var(--petrol); }
+.lbl { display:block; font-size:12.5px; font-weight:700; color:#6b6555; margin:10px 0 6px; }
+.lbl:first-of-type { margin-top:0; }
+
+.chips { display:flex; flex-wrap:wrap; gap:8px; }
+.chip { border:1.5px solid #ddd5c2; background:#fff; border-radius:999px; padding:7px 14px; font-family:inherit; font-size:13px; font-weight:600; color:#5a5445; cursor:pointer; transition:all .12s; }
+.chip.on { background:var(--petrol); border-color:var(--petrol); color:#fff; }
+.chip.pos.on { background:#2e7d5b; border-color:#2e7d5b; }
+.chip.neg.on { background:#b07817; border-color:#b07817; }
+.chip:active { transform:scale(.96); }
+
+.rate-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px dashed #eee4d0; }
+.rate-row:last-child { border-bottom:none; }
+.rate-name { font-size:14px; font-weight:700; color:var(--petrol-dark); width:56px; flex-shrink:0; }
+.rate-dots { display:flex; gap:7px; }
+.dot { width:36px; height:36px; border-radius:50%; border:2px solid #ddd5c2; background:#fff; font-family:inherit; font-size:14px; font-weight:800; color:#8a8577; cursor:pointer; transition:all .12s; display:flex; align-items:center; justify-content:center; }
+.dot.on { background:var(--petrol); border-color:var(--petrol); color:#fff; box-shadow:0 2px 6px rgba(30,90,90,.3); }
+.dot:active { transform:scale(.9); }
+.rate-word { font-size:11.5px; color:var(--gold); font-weight:700; width:64px; text-align:center; flex-shrink:0; min-height:14px; }
+
+.group-lbl { font-size:12.5px; font-weight:800; margin:12px 0 8px; display:flex; align-items:center; gap:6px; }
+.group-lbl.pos { color:#2e7d5b; }
+.group-lbl.neg { color:#b07817; }
+.group-lbl:first-of-type { margin-top:0; }
+
+.report { background:linear-gradient(160deg,#fbf7ec,#f5edd9); border:1.5px solid var(--gold); border-radius:16px; padding:16px; }
+.report h2 { color:var(--petrol-dark); }
+.bubble { background:#fff; border:1px solid #e8dcc0; border-radius:12px; padding:14px; font-size:13.5px; line-height:2; white-space:pre-line; color:#3d3a34; min-height:90px; }
+.bubble.empty { color:#a39880; display:flex; align-items:center; justify-content:center; text-align:center; }
+.actions { display:flex; gap:8px; margin-top:12px; }
+.btn { flex:1; border:none; border-radius:12px; padding:12px; font-family:inherit; font-size:14px; font-weight:800; cursor:pointer; transition:all .12s; }
+.btn.primary { background:var(--petrol); color:#fff; }
+.btn.primary:hover { background:var(--petrol-dark); }
+.btn.wa { background:#1faa53; color:#fff; }
+.btn.ghost { background:transparent; border:1.5px solid #d8cdb4; color:#6b6555; flex:0 0 auto; padding:12px 16px; }
+.btn:active { transform:scale(.97); }
+.btn:disabled { opacity:.5; cursor:default; }
+
+.toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(80px); opacity:0; pointer-events:none; background:var(--petrol-dark); color:#fff; padding:11px 22px; border-radius:999px; font-size:13.5px; font-weight:700; transition:transform .25s, opacity .25s; box-shadow:0 4px 14px rgba(0,0,0,.25); z-index:50; }
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+footer { text-align:center; font-size:11.5px; color:#a39880; margin-top:18px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <img src="logo-icon.png" alt="شعار أكاديمية فِطرة">
+    <div>
+      <div class="t1">تقرير الحصة بالضغطات</div>
+      <div class="t2">أكاديمية فِطرة · سجّل التقييم في أقل من دقيقة بدون كتابة</div>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2><span class="n">1</span> بيانات الحصة</h2>
+    <label class="lbl">اسم الطالب</label>
+    <input type="text" id="student" placeholder="مثال: يحيى نور">
+    <label class="lbl">المادة</label>
+    <div class="chips" id="subjects">
+      <button class="chip" data-v="القرآن الكريم">القرآن الكريم</button>
+      <button class="chip" data-v="اللغة العربية">اللغة العربية</button>
+      <button class="chip" data-v="التربية الإسلامية">التربية الإسلامية</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">2</span> التقييم بالضغطات</h2>
+    <div class="rate-row" data-k="mem">
+      <div class="rate-name">الحفظ</div>
+      <div class="rate-dots"></div>
+      <div class="rate-word"></div>
+    </div>
+    <div class="rate-row" data-k="taj">
+      <div class="rate-name">التجويد</div>
+      <div class="rate-dots"></div>
+      <div class="rate-word"></div>
+    </div>
+    <div class="rate-row" data-k="foc">
+      <div class="rate-name">التركيز</div>
+      <div class="rate-dots"></div>
+      <div class="rate-word"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">3</span> ملاحظات جاهزة <span style="font-weight:600;font-size:11px;color:#a39880">(اضغط للاختيار، ويمكن اختيار أكثر من واحدة)</span></h2>
+    <div class="group-lbl pos">✓ نقاط القوة</div>
+    <div class="chips" id="pos">
+      <button class="chip pos">إنجاز ممتاز</button>
+      <button class="chip pos">حفظ متقن</button>
+      <button class="chip pos">تركيز عالٍ طوال الحصة</button>
+      <button class="chip pos">تحسّن واضح في التلاوة</button>
+      <button class="chip pos">مخارج الحروف سليمة</button>
+      <button class="chip pos">مواظبة ممتازة على المراجعة</button>
+      <button class="chip pos">مشاركة فعّالة وحماس واضح</button>
+      <button class="chip pos">يجيب بثقة وبدون تردد</button>
+    </div>
+    <div class="group-lbl neg">◆ جوانب سنعمل عليها</div>
+    <div class="chips" id="neg">
+      <button class="chip neg">بيخطئ في مخارج بعض الحروف</button>
+      <button class="chip neg">يحتاج مراجعة الحفظ السابق</button>
+      <button class="chip neg">تشتت في التركيز أحيانًا</button>
+      <button class="chip neg">أخطاء في أحكام الغنّة</button>
+      <button class="chip neg">أخطاء في القلقلة</button>
+      <button class="chip neg">التلاوة تحتاج تمرينًا على الطلاقة</button>
+      <button class="chip neg">يحتاج تثبيت المقطع الجديد</button>
+      <button class="chip neg">الواجب السابق غير مكتمل</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2><span class="n">4</span> الواجب <span style="font-weight:600;font-size:11px;color:#a39880">(اختياري)</span></h2>
+    <div class="chips" id="hw">
+      <button class="chip" data-v="مراجعة ما تم حفظه اليوم">مراجعة ما تم حفظه</button>
+      <button class="chip" data-v="تسجيل صوتي للتلاوة">تسجيل صوتي للتلاوة</button>
+      <button class="chip" data-v="حفظ المقطع الجديد">حفظ المقطع الجديد</button>
+      <button class="chip" data-v="تمرين تجويد مركّز على الأخطاء">تمرين تجويد مركّز</button>
+    </div>
+    <label class="lbl">أو اكتب واجبًا آخر</label>
+    <input type="text" id="hwText" placeholder="مثال: مراجعة سورة الملك 11–15">
+  </div>
+
+  <div class="report card">
+    <h2><span class="n">✓</span> تقرير ولي الأمر — يتولّد تلقائيًا</h2>
+    <div class="bubble empty" id="bubble">اختر المادة والتقييم والملاحظات بالأعلى، وسيظهر التقرير الجاهز هنا</div>
+    <div class="actions">
+      <button class="btn primary" id="copyBtn">نسخ التقرير</button>
+      <button class="btn wa" id="waBtn">فتح في واتساب</button>
+      <button class="btn ghost" id="resetBtn">جديد</button>
+    </div>
+  </div>
+
+  <footer>أكاديمية فِطرة · أداة المعلم لتقارير الحصص</footer>
+</div>
+<div class="toast" id="toast">تم نسخ التقرير ✓</div>
+
+<script>
+const WORDS = {1:"يحتاج دعمًا",2:"مقبول",3:"جيد",4:"جيد جدًا",5:"ممتاز"};
+const state = { student:"", subject:"", mem:0, taj:0, foc:0, pos:new Set(), neg:new Set(), hw:"", hwText:"" };
+
+// rating dots
+document.querySelectorAll(".rate-row").forEach(row => {
+  const k = row.dataset.k;
+  const dots = row.querySelector(".rate-dots");
+  const word = row.querySelector(".rate-word");
+  for (let i = 1; i <= 5; i++) {
+    const b = document.createElement("button");
+    b.className = "dot"; b.textContent = i; b.type = "button";
+    b.onclick = () => {
+      state[k] = state[k] === i ? 0 : i;
+      dots.querySelectorAll(".dot").forEach((d, j) => d.classList.toggle("on", j < state[k]));
+      word.textContent = state[k] ? WORDS[state[k]] : "";
+      render();
+    };
+    dots.appendChild(b);
+  }
+});
+
+// subjects (single select)
+document.querySelectorAll("#subjects .chip").forEach(c => c.onclick = () => {
+  const v = c.dataset.v;
+  state.subject = state.subject === v ? "" : v;
+  document.querySelectorAll("#subjects .chip").forEach(x => x.classList.toggle("on", x.dataset.v === state.subject));
+  render();
+});
+
+// comment banks (multi)
+function bank(id, key) {
+  document.querySelectorAll("#" + id + " .chip").forEach(c => c.onclick = () => {
+    const t = c.textContent;
+    state[key].has(t) ? state[key].delete(t) : state[key].add(t);
+    c.classList.toggle("on");
+    render();
+  });
+}
+bank("pos", "pos"); bank("neg", "neg");
+
+// homework chips (single) + free text
+document.querySelectorAll("#hw .chip").forEach(c => c.onclick = () => {
+  const v = c.dataset.v;
+  state.hw = state.hw === v ? "" : v;
+  document.querySelectorAll("#hw .chip").forEach(x => x.classList.toggle("on", x.dataset.v === state.hw));
+  render();
+});
+document.getElementById("student").oninput = e => { state.student = e.target.value.trim(); render(); };
+document.getElementById("hwText").oninput = e => { state.hwText = e.target.value.trim(); render(); };
+
+function todayAr() {
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
+}
+
+function buildReport() {
+  const hasAny = state.subject || state.mem || state.taj || state.foc || state.pos.size || state.neg.size;
+  if (!hasAny) return "";
+  const name = state.student || "الطالب";
+  const L = [];
+  L.push("السلام عليكم ورحمة الله وبركاته");
+  L.push("تقرير حصة " + (state.subject || "—") + " — " + name);
+  L.push("التاريخ: " + todayAr());
+  const r = [];
+  if (state.mem) r.push("الحفظ " + state.mem + "/5 (" + WORDS[state.mem] + ")");
+  if (state.taj) r.push("التجويد " + state.taj + "/5 (" + WORDS[state.taj] + ")");
+  if (state.foc) r.push("التركيز " + state.foc + "/5 (" + WORDS[state.foc] + ")");
+  if (r.length) L.push("★ التقييم: " + r.join(" · "));
+  if (state.pos.size) L.push("✓ نقاط القوة: " + [...state.pos].join("، "));
+  if (state.neg.size) L.push("◆ ما سنعمل عليه معه: " + [...state.neg].join("، "));
+  const hw = state.hwText || state.hw;
+  if (hw) L.push("▪ الواجب: " + hw);
+  L.push("مع تحيات أكاديمية فِطرة");
+  return L.join("\n");
+}
+
+function render() {
+  const t = buildReport();
+  const b = document.getElementById("bubble");
+  if (t) { b.textContent = t; b.classList.remove("empty"); }
+  else { b.textContent = "اختر المادة والتقييم والملاحظات بالأعلى، وسيظهر التقرير الجاهز هنا"; b.classList.add("empty"); }
+  return t;
+}
+
+document.getElementById("copyBtn").onclick = async () => {
+  const t = buildReport();
+  if (!t) return;
+  try { await navigator.clipboard.writeText(t); }
+  catch(e) {
+    const ta = document.createElement("textarea");
+    ta.value = t; document.body.appendChild(ta); ta.select();
+    document.execCommand("copy"); ta.remove();
+  }
+  const toast = document.getElementById("toast");
+  toast.classList.add("show");
+  setTimeout(() => toast.classList.remove("show"), 1800);
+};
+
+document.getElementById("waBtn").onclick = () => {
+  const t = buildReport();
+  if (!t) return;
+  window.open("https://wa.me/?text=" + encodeURIComponent(t), "_blank");
+};
+
+document.getElementById("resetBtn").onclick = () => location.reload();
+</script>
+</body>
+</html>
