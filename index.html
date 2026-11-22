@@ -23,6 +23,7 @@ header .t2 { font-size:12px; color:var(--beige); opacity:.9; margin-top:2px; }
 .card { background:#fff; border-radius:16px; padding:16px; margin-bottom:12px; box-shadow:0 1px 4px rgba(30,90,90,.08); border:1px solid rgba(30,90,90,.07); }
 .card h2 { font-size:15px; font-weight:800; color:var(--petrol-dark); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
 .card h2 .n { width:22px; height:22px; border-radius:50%; background:var(--gold); color:var(--petrol-dark); font-size:12px; font-weight:800; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0; }
+.hint { font-weight:600; font-size:11px; color:#a39880; }
 
 input[type=text] { width:100%; border:1.5px solid #ddd5c2; border-radius:10px; padding:10px 12px; font-family:inherit; font-size:14px; outline:none; background:#fff; }
 input[type=text]:focus { border-color:var(--petrol); }
@@ -36,8 +37,13 @@ input[type=text]:focus { border-color:var(--petrol); }
 .chip.neg.on { background:#b07817; border-color:#b07817; }
 .chip:active { transform:scale(.96); }
 
+.subj { display:none; border:1.5px solid #eee4d0; border-radius:14px; padding:14px; margin-bottom:12px; background:#fffdf8; }
+.subj.show { display:block; }
+.subj:last-child { margin-bottom:0; }
+.subj-title { font-size:14.5px; font-weight:800; color:var(--petrol-dark); margin-bottom:4px; display:flex; align-items:center; gap:8px; }
+.subj-title::before { content:""; width:9px; height:9px; border-radius:50%; background:var(--gold); flex-shrink:0; }
+
 .rate-row { display:flex; align-items:center; justify-content:space-between; gap:10px; padding:10px 0; border-bottom:1px dashed #eee4d0; }
-.rate-row:last-child { border-bottom:none; }
 .rate-name { font-size:14px; font-weight:700; color:var(--petrol-dark); width:56px; flex-shrink:0; }
 .rate-dots { display:flex; gap:7px; }
 .dot { width:36px; height:36px; border-radius:50%; border:2px solid #ddd5c2; background:#fff; font-family:inherit; font-size:14px; font-weight:800; color:#8a8577; cursor:pointer; transition:all .12s; display:flex; align-items:center; justify-content:center; }
@@ -48,7 +54,6 @@ input[type=text]:focus { border-color:var(--petrol); }
 .group-lbl { font-size:12.5px; font-weight:800; margin:12px 0 8px; display:flex; align-items:center; gap:6px; }
 .group-lbl.pos { color:#2e7d5b; }
 .group-lbl.neg { color:#b07817; }
-.group-lbl:first-of-type { margin-top:0; }
 
 .report { background:linear-gradient(160deg,#fbf7ec,#f5edd9); border:1.5px solid var(--gold); border-radius:16px; padding:16px; }
 .report h2 { color:var(--petrol-dark); }
@@ -61,7 +66,6 @@ input[type=text]:focus { border-color:var(--petrol); }
 .btn.wa { background:#1faa53; color:#fff; }
 .btn.ghost { background:transparent; border:1.5px solid #d8cdb4; color:#6b6555; flex:0 0 auto; padding:12px 16px; }
 .btn:active { transform:scale(.97); }
-.btn:disabled { opacity:.5; cursor:default; }
 
 .toast { position:fixed; bottom:22px; left:50%; transform:translateX(-50%) translateY(80px); opacity:0; pointer-events:none; background:var(--petrol-dark); color:#fff; padding:11px 22px; border-radius:999px; font-size:13.5px; font-weight:700; transition:transform .25s, opacity .25s; box-shadow:0 4px 14px rgba(0,0,0,.25); z-index:50; }
 .toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
@@ -82,66 +86,102 @@ footer { text-align:center; font-size:11.5px; color:#a39880; margin-top:18px; }
     <h2><span class="n">1</span> بيانات الحصة</h2>
     <label class="lbl">اسم الطالب</label>
     <input type="text" id="student" placeholder="مثال: يحيى نور">
-    <label class="lbl">المادة</label>
+    <label class="lbl">اسم المعلم</label>
+    <input type="text" id="teacher" placeholder="مثال: أ. يوسف كريم">
+    <label class="lbl">مدة الحصة</label>
+    <div class="chips" id="dur">
+      <button class="chip">30 دقيقة</button>
+      <button class="chip">45 دقيقة</button>
+      <button class="chip">60 دقيقة</button>
+    </div>
+    <label class="lbl">المواد <span class="hint">(يمكن اختيار أكثر من مادة)</span></label>
     <div class="chips" id="subjects">
-      <button class="chip" data-v="القرآن الكريم">القرآن الكريم</button>
-      <button class="chip" data-v="اللغة العربية">اللغة العربية</button>
-      <button class="chip" data-v="التربية الإسلامية">التربية الإسلامية</button>
+      <button class="chip" data-s="quran">القرآن الكريم</button>
+      <button class="chip" data-s="arabic">اللغة العربية</button>
+      <button class="chip" data-s="islamic">التربية الإسلامية</button>
     </div>
   </div>
 
   <div class="card">
-    <h2><span class="n">2</span> التقييم بالضغطات</h2>
-    <div class="rate-row" data-k="mem">
-      <div class="rate-name">الحفظ</div>
-      <div class="rate-dots"></div>
-      <div class="rate-word"></div>
+    <h2><span class="n">2</span> تقييم كل مادة على حدة <span class="hint">(اختر المادة أولًا من الأعلى)</span></h2>
+    <div id="noSubj" class="hint" style="padding:6px 0 2px">لم تُختر أي مادة بعد — اختر مادة أو أكثر وسيظهر تقييم كل واحدة هنا.</div>
+
+    <div class="subj" id="subj-quran">
+      <div class="subj-title">القرآن الكريم</div>
+      <div class="rate-row" data-s="quran" data-k="mem"><div class="rate-name">الحفظ</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="rate-row" data-s="quran" data-k="taj"><div class="rate-name">التجويد</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="rate-row" data-s="quran" data-k="foc" style="border-bottom:none"><div class="rate-name">التركيز</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="group-lbl pos">✓ نقاط القوة</div>
+      <div class="chips" data-bank="quran-pos">
+        <button class="chip pos">حفظ متقن</button>
+        <button class="chip pos">تحسّن واضح في التلاوة</button>
+        <button class="chip pos">مخارج الحروف سليمة</button>
+        <button class="chip pos">مواظبة ممتازة على المراجعة</button>
+        <button class="chip pos">يراجع بنفسه قبل التسميع</button>
+      </div>
+      <div class="group-lbl neg">◆ جوانب سنعمل عليها</div>
+      <div class="chips" data-bank="quran-neg">
+        <button class="chip neg">يحتاج مراجعة الحفظ السابق</button>
+        <button class="chip neg">بيخطئ في مخارج بعض الحروف</button>
+        <button class="chip neg">أخطاء في أحكام الغنّة</button>
+        <button class="chip neg">أخطاء في القلقلة</button>
+        <button class="chip neg">التلاوة تحتاج تمرينًا على الطلاقة</button>
+      </div>
     </div>
-    <div class="rate-row" data-k="taj">
-      <div class="rate-name">التجويد</div>
-      <div class="rate-dots"></div>
-      <div class="rate-word"></div>
+
+    <div class="subj" id="subj-arabic">
+      <div class="subj-title">اللغة العربية</div>
+      <div class="rate-row" data-s="arabic" data-k="read"><div class="rate-name">القراءة</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="rate-row" data-s="arabic" data-k="write"><div class="rate-name">الإملاء</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="rate-row" data-s="arabic" data-k="foc" style="border-bottom:none"><div class="rate-name">التركيز</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="group-lbl pos">✓ نقاط القوة</div>
+      <div class="chips" data-bank="arabic-pos">
+        <button class="chip pos">يقرأ بطلاقة واضحة</button>
+        <button class="chip pos">إملاء ممتاز</button>
+        <button class="chip pos">يفهم المعاني الجديدة بسرعة</button>
+        <button class="chip pos">خطّه تحسّن كثيرًا</button>
+        <button class="chip pos">يشارك ويجيب بثقة</button>
+      </div>
+      <div class="group-lbl neg">◆ جوانب سنعمل عليها</div>
+      <div class="chips" data-bank="arabic-neg">
+        <button class="chip neg">أخطاء إملائية متكررة</button>
+        <button class="chip neg">القراءة تحتاج تمرينًا على الطلاقة</button>
+        <button class="chip neg">يتسرّع في القراءة ويهمل الحركات</button>
+        <button class="chip neg">يحتاج تثبيت قواعد الدرس الجديد</button>
+      </div>
     </div>
-    <div class="rate-row" data-k="foc">
-      <div class="rate-name">التركيز</div>
-      <div class="rate-dots"></div>
-      <div class="rate-word"></div>
+
+    <div class="subj" id="subj-islamic">
+      <div class="subj-title">التربية الإسلامية</div>
+      <div class="rate-row" data-s="islamic" data-k="mem"><div class="rate-name">الحفظ</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="rate-row" data-s="islamic" data-k="und"><div class="rate-name">الفهم</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="rate-row" data-s="islamic" data-k="foc" style="border-bottom:none"><div class="rate-name">التركيز</div><div class="rate-dots"></div><div class="rate-word"></div></div>
+      <div class="group-lbl pos">✓ نقاط القوة</div>
+      <div class="chips" data-bank="islamic-pos">
+        <button class="chip pos">يحفظ الحديث والأدعية بسهولة</button>
+        <button class="chip pos">يفهم المعنى ويربطه بحياته</button>
+        <button class="chip pos">سلوك ممتاز داخل الحصة</button>
+        <button class="chip pos">يسأل أسئلة ذكية عن الدرس</button>
+      </div>
+      <div class="group-lbl neg">◆ جوانب سنعمل عليها</div>
+      <div class="chips" data-bank="islamic-neg">
+        <button class="chip neg">يحتاج مراجعة الأدعية السابقة</button>
+        <button class="chip neg">يحفظ دون فهم المعنى</button>
+        <button class="chip neg">تشتت في التركيز أحيانًا</button>
+        <button class="chip neg">يحتاج متابعة في تطبيق السنن اليومية</button>
+      </div>
     </div>
   </div>
 
   <div class="card">
-    <h2><span class="n">3</span> ملاحظات جاهزة <span style="font-weight:600;font-size:11px;color:#a39880">(اضغط للاختيار، ويمكن اختيار أكثر من واحدة)</span></h2>
-    <div class="group-lbl pos">✓ نقاط القوة</div>
-    <div class="chips" id="pos">
-      <button class="chip pos">إنجاز ممتاز</button>
-      <button class="chip pos">حفظ متقن</button>
-      <button class="chip pos">تركيز عالٍ طوال الحصة</button>
-      <button class="chip pos">تحسّن واضح في التلاوة</button>
-      <button class="chip pos">مخارج الحروف سليمة</button>
-      <button class="chip pos">مواظبة ممتازة على المراجعة</button>
-      <button class="chip pos">مشاركة فعّالة وحماس واضح</button>
-      <button class="chip pos">يجيب بثقة وبدون تردد</button>
-    </div>
-    <div class="group-lbl neg">◆ جوانب سنعمل عليها</div>
-    <div class="chips" id="neg">
-      <button class="chip neg">بيخطئ في مخارج بعض الحروف</button>
-      <button class="chip neg">يحتاج مراجعة الحفظ السابق</button>
-      <button class="chip neg">تشتت في التركيز أحيانًا</button>
-      <button class="chip neg">أخطاء في أحكام الغنّة</button>
-      <button class="chip neg">أخطاء في القلقلة</button>
-      <button class="chip neg">التلاوة تحتاج تمرينًا على الطلاقة</button>
-      <button class="chip neg">يحتاج تثبيت المقطع الجديد</button>
-      <button class="chip neg">الواجب السابق غير مكتمل</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <h2><span class="n">4</span> الواجب <span style="font-weight:600;font-size:11px;color:#a39880">(اختياري)</span></h2>
+    <h2><span class="n">3</span> الواجب <span class="hint">(اختياري، ويمكن اختيار أكثر من واحد)</span></h2>
     <div class="chips" id="hw">
-      <button class="chip" data-v="مراجعة ما تم حفظه اليوم">مراجعة ما تم حفظه</button>
-      <button class="chip" data-v="تسجيل صوتي للتلاوة">تسجيل صوتي للتلاوة</button>
-      <button class="chip" data-v="حفظ المقطع الجديد">حفظ المقطع الجديد</button>
-      <button class="chip" data-v="تمرين تجويد مركّز على الأخطاء">تمرين تجويد مركّز</button>
+      <button class="chip">مراجعة ما تم حفظه</button>
+      <button class="chip">تسجيل صوتي للتلاوة</button>
+      <button class="chip">حفظ المقطع الجديد</button>
+      <button class="chip">تمرين تجويد مركّز</button>
+      <button class="chip">تدريبات إملاء</button>
+      <button class="chip">مراجعة الدرس مع ولي الأمر</button>
     </div>
     <label class="lbl">أو اكتب واجبًا آخر</label>
     <input type="text" id="hwText" placeholder="مثال: مراجعة سورة الملك 11–15">
@@ -149,7 +189,7 @@ footer { text-align:center; font-size:11.5px; color:#a39880; margin-top:18px; }
 
   <div class="report card">
     <h2><span class="n">✓</span> تقرير ولي الأمر — يتولّد تلقائيًا</h2>
-    <div class="bubble empty" id="bubble">اختر المادة والتقييم والملاحظات بالأعلى، وسيظهر التقرير الجاهز هنا</div>
+    <div class="bubble empty" id="bubble">اختر المواد وقيّم كل مادة، وسيظهر التقرير الجاهز هنا</div>
     <div class="actions">
       <button class="btn primary" id="copyBtn">نسخ التقرير</button>
       <button class="btn wa" id="waBtn">فتح في واتساب</button>
@@ -163,53 +203,70 @@ footer { text-align:center; font-size:11.5px; color:#a39880; margin-top:18px; }
 
 <script>
 const WORDS = {1:"يحتاج دعمًا",2:"مقبول",3:"جيد",4:"جيد جدًا",5:"ممتاز"};
-const state = { student:"", subject:"", mem:0, taj:0, foc:0, pos:new Set(), neg:new Set(), hw:"", hwText:"" };
+const SUBJ = {
+  quran:   { name:"القرآن الكريم",     icon:"📖", crit:{ mem:"الحفظ",  taj:"التجويد", foc:"التركيز" } },
+  arabic:  { name:"اللغة العربية",     icon:"📗", crit:{ read:"القراءة", write:"الإملاء", foc:"التركيز" } },
+  islamic: { name:"التربية الإسلامية", icon:"🕌", crit:{ mem:"الحفظ",  und:"الفهم",   foc:"التركيز" } },
+};
+const state = { student:"", teacher:"", dur:"", subjects:new Set(), rates:{}, banks:{}, hw:new Set(), hwText:"" };
 
-// rating dots
+// subjects (multi select)
+document.querySelectorAll("#subjects .chip").forEach(c => c.onclick = () => {
+  const s = c.dataset.s;
+  state.subjects.has(s) ? state.subjects.delete(s) : state.subjects.add(s);
+  c.classList.toggle("on");
+  document.getElementById("subj-" + s).classList.toggle("show", state.subjects.has(s));
+  document.getElementById("noSubj").style.display = state.subjects.size ? "none" : "block";
+  render();
+});
+
+// rating dots per subject + criterion
 document.querySelectorAll(".rate-row").forEach(row => {
-  const k = row.dataset.k;
+  const s = row.dataset.s, k = row.dataset.k;
   const dots = row.querySelector(".rate-dots");
   const word = row.querySelector(".rate-word");
   for (let i = 1; i <= 5; i++) {
     const b = document.createElement("button");
     b.className = "dot"; b.textContent = i; b.type = "button";
     b.onclick = () => {
-      state[k] = state[k] === i ? 0 : i;
-      dots.querySelectorAll(".dot").forEach((d, j) => d.classList.toggle("on", j < state[k]));
-      word.textContent = state[k] ? WORDS[state[k]] : "";
+      const key = s + "." + k;
+      state.rates[key] = state.rates[key] === i ? 0 : i;
+      dots.querySelectorAll(".dot").forEach((d, j) => d.classList.toggle("on", j < state.rates[key]));
+      word.textContent = state.rates[key] ? WORDS[state.rates[key]] : "";
       render();
     };
     dots.appendChild(b);
   }
 });
 
-// subjects (single select)
-document.querySelectorAll("#subjects .chip").forEach(c => c.onclick = () => {
-  const v = c.dataset.v;
-  state.subject = state.subject === v ? "" : v;
-  document.querySelectorAll("#subjects .chip").forEach(x => x.classList.toggle("on", x.dataset.v === state.subject));
-  render();
-});
-
-// comment banks (multi)
-function bank(id, key) {
-  document.querySelectorAll("#" + id + " .chip").forEach(c => c.onclick = () => {
+// per-subject comment banks (multi)
+document.querySelectorAll("[data-bank] .chip").forEach(c => {
+  c.onclick = () => {
+    const bk = c.parentElement.dataset.bank;
+    if (!state.banks[bk]) state.banks[bk] = new Set();
+    const set = state.banks[bk];
     const t = c.textContent;
-    state[key].has(t) ? state[key].delete(t) : state[key].add(t);
+    set.has(t) ? set.delete(t) : set.add(t);
     c.classList.toggle("on");
     render();
-  });
-}
-bank("pos", "pos"); bank("neg", "neg");
+  };
+});
 
-// homework chips (single) + free text
+// homework chips (multi) + free text
 document.querySelectorAll("#hw .chip").forEach(c => c.onclick = () => {
-  const v = c.dataset.v;
-  state.hw = state.hw === v ? "" : v;
-  document.querySelectorAll("#hw .chip").forEach(x => x.classList.toggle("on", x.dataset.v === state.hw));
+  const t = c.textContent;
+  state.hw.has(t) ? state.hw.delete(t) : state.hw.add(t);
+  c.classList.toggle("on");
   render();
 });
 document.getElementById("student").oninput = e => { state.student = e.target.value.trim(); render(); };
+document.getElementById("teacher").oninput = e => { state.teacher = e.target.value.trim(); render(); };
+document.querySelectorAll("#dur .chip").forEach(c => c.onclick = () => {
+  const t = c.textContent;
+  state.dur = state.dur === t ? "" : t;
+  document.querySelectorAll("#dur .chip").forEach(x => x.classList.toggle("on", x.textContent === state.dur));
+  render();
+});
 document.getElementById("hwText").oninput = e => { state.hwText = e.target.value.trim(); render(); };
 
 function todayAr() {
@@ -217,23 +274,42 @@ function todayAr() {
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
 }
 
-function buildReport() {
-  const hasAny = state.subject || state.mem || state.taj || state.foc || state.pos.size || state.neg.size;
-  if (!hasAny) return "";
-  const name = state.student || "الطالب";
+function subjBlock(s) {
+  const def = SUBJ[s];
   const L = [];
-  L.push("السلام عليكم ورحمة الله وبركاته");
-  L.push("تقرير حصة " + (state.subject || "—") + " — " + name);
-  L.push("التاريخ: " + todayAr());
   const r = [];
-  if (state.mem) r.push("الحفظ " + state.mem + "/5 (" + WORDS[state.mem] + ")");
-  if (state.taj) r.push("التجويد " + state.taj + "/5 (" + WORDS[state.taj] + ")");
-  if (state.foc) r.push("التركيز " + state.foc + "/5 (" + WORDS[state.foc] + ")");
+  for (const [k, label] of Object.entries(def.crit)) {
+    const v = state.rates[s + "." + k];
+    if (v) r.push(label + " " + v + "/5 (" + WORDS[v] + ")");
+  }
+  const pos = state.banks[s + "-pos"], neg = state.banks[s + "-neg"];
+  if (!r.length && !(pos && pos.size) && !(neg && neg.size)) return null;
+  L.push(def.icon + " " + def.name);
   if (r.length) L.push("★ التقييم: " + r.join(" · "));
-  if (state.pos.size) L.push("✓ نقاط القوة: " + [...state.pos].join("، "));
-  if (state.neg.size) L.push("◆ ما سنعمل عليه معه: " + [...state.neg].join("، "));
-  const hw = state.hwText || state.hw;
-  if (hw) L.push("▪ الواجب: " + hw);
+  if (pos && pos.size) L.push("✓ نقاط القوة: " + [...pos].join("، "));
+  if (neg && neg.size) L.push("◆ ما سنعمل عليه معه: " + [...neg].join("، "));
+  return L.join("\n");
+}
+
+function buildReport() {
+  const blocks = [...state.subjects].map(subjBlock).filter(Boolean);
+  if (!blocks.length && !state.student) return "";
+  const L = [];
+  const line = "━━━━━━━━━━";
+  L.push("✨ تقرير الحصة | أكاديمية فِطرة ✨");
+  L.push(line);
+  L.push("السلام عليكم ورحمة الله وبركاته");
+  L.push("👤 الطالب: " + (state.student || "الطالب"));
+  if (state.teacher) L.push("👨‍🏫 المعلم: " + state.teacher);
+  L.push("📅 التاريخ: " + todayAr());
+  if (state.dur) L.push("⏱ مدة الحصة: " + state.dur);
+  L.push(line);
+  if (blocks.length) { L.push(""); L.push(blocks.join("\n\n")); }
+  const hw = [...state.hw];
+  if (state.hwText) hw.push(state.hwText);
+  if (hw.length) { L.push(""); L.push("▪ الواجب: " + hw.join("، ")); }
+  L.push("");
+  L.push("بارك الله فيه وزاده من العلم 🤍");
   L.push("مع تحيات أكاديمية فِطرة");
   return L.join("\n");
 }
@@ -242,7 +318,7 @@ function render() {
   const t = buildReport();
   const b = document.getElementById("bubble");
   if (t) { b.textContent = t; b.classList.remove("empty"); }
-  else { b.textContent = "اختر المادة والتقييم والملاحظات بالأعلى، وسيظهر التقرير الجاهز هنا"; b.classList.add("empty"); }
+  else { b.textContent = "اختر المواد وقيّم كل مادة، وسيظهر التقرير الجاهز هنا"; b.classList.add("empty"); }
   return t;
 }
 
